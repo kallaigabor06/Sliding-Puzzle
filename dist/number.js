@@ -15,7 +15,11 @@ export class Number {
         if (this.x !== undefined && this.y !== undefined) {
             const oldIndex = this.y * this.size + this.x + 1;
             const oldItem = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
+
             oldItem?.replaceChildren();
+
+            oldItem?.replaceChildren(); 
+
         }
         const div = this.createElement();
         const newIndex = y * this.size + x + 1;

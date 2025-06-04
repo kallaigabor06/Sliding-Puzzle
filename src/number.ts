@@ -2,22 +2,36 @@ export class Number {
     value: number;
     numbers: Number[];
     x: number | undefined;
+
     y: number | undefined;
     size: number;
 
     constructor(value: number, numbers: Number[], size: number) {
         this.value = value;          
+
+    y: number| undefined;
+    size: number;
+
+    constructor(value: number, numbers: Number[], size: number) {
+        this.value = value;         
+
         this.numbers = numbers;
         this.x = undefined;
         this.y = undefined;
         this.size = size;
     }
 
+
+
     setPosition(x: number, y: number): void {
     if (this.x !== undefined && this.y !== undefined) {
         const oldIndex = this.y * this.size + this.x + 1;
         const oldItem = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
+
         oldItem?.replaceChildren();  
+
+        oldItem?.replaceChildren();  
+
     }
 
     const div = this.createElement();
@@ -75,4 +89,4 @@ checkIsEmpty(checkX: number, checkY: number): boolean {
     return !this.numbers.some(n => n.x === checkX && n.y === checkY);
 }
 
-}
+
