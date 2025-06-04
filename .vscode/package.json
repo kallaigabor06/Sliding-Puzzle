@@ -1,5 +1,5 @@
 {
-  "liveServer.settings.port": 5501,
+
   "name": "sliding-puzzle",
   "version": "1.0.0",
   "description": "",
@@ -18,5 +18,5 @@
     "url": "https://github.com/kallaigabor06/Sliding-Puzzle/issues"
   },
   "homepage": "https://github.com/kallaigabor06/Sliding-Puzzle#readme"
-  
+
 }
