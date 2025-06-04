@@ -6,7 +6,7 @@ export class Number {
     size: number;
 
     constructor(value: number, numbers: Number[], size: number) {
-        this.value = value;          //létrejön egy osztályszintű "value" változó
+        this.value = value;          
         this.numbers = numbers;
         this.x = undefined;
         this.y = undefined;
@@ -17,7 +17,7 @@ export class Number {
     if (this.x !== undefined && this.y !== undefined) {
         const oldIndex = this.y * this.size + this.x + 1;
         const oldItem = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
-        oldItem?.replaceChildren();  // Tisztább, gyorsabb módja az innerHTML = ''-nek
+        oldItem?.replaceChildren();  
     }
 
     const div = this.createElement();
