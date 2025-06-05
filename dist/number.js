@@ -1,64 +1,65 @@
-export class Number {
-    value;
-    numbers;
-    x;
-    y;
-    size;
-    constructor(value, numbers, size) {
-        this.value = value;
-        this.numbers = numbers;
-        this.x = undefined;
-        this.y = undefined;
-        this.size = size;
+export class Tile {
+    label;
+    allTiles;
+    col;
+    row;
+    boardSize;
+    constructor(label, allTiles, boardSize) {
+        this.label = label;
+        this.allTiles = allTiles;
+        this.boardSize = boardSize;
     }
-    setPosition(x, y) {
-        if (this.x !== undefined && this.y !== undefined) {
-            const oldIndex = this.y * this.size + this.x + 1;
-            const oldItem = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
-            oldItem?.replaceChildren();
-            oldItem?.replaceChildren();
+    moveTo(col, row) {
+        if (this.col !== undefined && this.row !== undefined) {
+            const oldIndex = this.row * this.boardSize + this.col + 1;
+            const oldCell = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
+            if (oldCell) {
+                oldCell.innerHTML = '';
+            }
         }
-        const div = this.createElement();
-        const newIndex = y * this.size + x + 1;
-        const gridItem = document.querySelector(`div.grid-item:nth-of-type(${newIndex})`);
-        gridItem?.appendChild(div);
-        this.x = x;
-        this.y = y;
+        const tileElement = this.createTileElement();
+        const newIndex = row * this.boardSize + col + 1;
+        const newCell = document.querySelector(`div.grid-item:nth-of-type(${newIndex})`);
+        if (newCell) {
+            newCell.appendChild(tileElement);
+        }
+        this.col = col;
+        this.row = row;
     }
-    createElement() {
-        const div = document.createElement('div');
-        div.className = 'number';
-        div.number = this.value;
-        div.innerText = this.value.toString();
-        div.addEventListener('click', () => {
-            const emptyPosition = this.emptyPosition;
-            if (emptyPosition !== null) {
-                this.setPosition(emptyPosition.x, emptyPosition.y);
+    createTileElement() {
+        const tile = document.createElement('div');
+        tile.className = 'number';
+        tile.textContent = this.label.toString();
+        tile.number = this.label; // típushiba elkerülése
+        tile.addEventListener('click', () => {
+            const available = this.getEmptyNeighbor();
+            if (available !== null) {
+                this.moveTo(available.col, available.row);
             }
         });
-        return div;
+        return tile;
     }
-    get emptyPosition() {
-        if (this.x === undefined || this.y === undefined)
+    getEmptyNeighbor() {
+        if (this.col === undefined || this.row === undefined)
             return null;
         const directions = [
-            { dx: -1, dy: 0 }, // left
-            { dx: 1, dy: 0 }, // right
-            { dx: 0, dy: 1 }, // down
-            { dx: 0, dy: -1 } // up
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: -1 },
         ];
         for (const { dx, dy } of directions) {
-            const checkX = this.x + dx;
-            const checkY = this.y + dy;
-            if (checkX >= 0 && checkX < this.size &&
-                checkY >= 0 && checkY < this.size &&
-                this.checkIsEmpty(checkX, checkY)) {
-                return { x: checkX, y: checkY };
+            const newCol = this.col + dx;
+            const newRow = this.row + dy;
+            if (newCol >= 0 && newCol < this.boardSize &&
+                newRow >= 0 && newRow < this.boardSize &&
+                this.isCellEmpty(newCol, newRow)) {
+                return { col: newCol, row: newRow };
             }
         }
         return null;
     }
-    checkIsEmpty(checkX, checkY) {
-        return !this.numbers.some(n => n.x === checkX && n.y === checkY);
+    isCellEmpty(col, row) {
+        return !this.allTiles.some(tile => tile.col === col && tile.row === row);
     }
 }

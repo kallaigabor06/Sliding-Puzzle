@@ -1,85 +1,78 @@
-export class Number {
-    value: number;
-    numbers: Number[];
-    x: number | undefined;
+export class Tile {
+    private label: number;
+    private allTiles: Tile[];
+    private col?: number;
+    private row?: number;
+    private boardSize: number;
 
-    y: number | undefined;
-    size: number;
-
-    constructor(value: number, numbers: Number[], size: number) {
-        this.value = value;
-
-        this.numbers = numbers;
-        this.x = undefined;
-        this.y = undefined;
-        this.size = size;
+    constructor(label: number, allTiles: Tile[], boardSize: number) {
+        this.label = label;
+        this.allTiles = allTiles;
+        this.boardSize = boardSize;
     }
 
-
-
-    setPosition(x: number, y: number): void {
-        if (this.x !== undefined && this.y !== undefined) {
-            const oldIndex = this.y * this.size + this.x + 1;
-            const oldItem = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
-
-            oldItem?.replaceChildren();
-
-            oldItem?.replaceChildren();
-
+    public moveTo(col: number, row: number): void {
+        if (this.col !== undefined && this.row !== undefined) {
+            const oldIndex = this.row * this.boardSize + this.col + 1;
+            const oldCell = document.querySelector(`div.grid-item:nth-of-type(${oldIndex})`);
+            if (oldCell) {
+                oldCell.innerHTML = '';
+            }
         }
 
-        const div = this.createElement();
-        const newIndex = y * this.size + x + 1;
-        const gridItem = document.querySelector(`div.grid-item:nth-of-type(${newIndex})`);
-        gridItem?.appendChild(div);
+        const tileElement = this.createTileElement();
+        const newIndex = row * this.boardSize + col + 1;
+        const newCell = document.querySelector(`div.grid-item:nth-of-type(${newIndex})`);
+        if (newCell) {
+            newCell.appendChild(tileElement);
+        }
 
-        this.x = x;
-        this.y = y;
+        this.col = col;
+        this.row = row;
     }
 
-    createElement(): HTMLDivElement {
-        const div = document.createElement('div');
-        div.className = 'number';
-        (div as any).number = this.value;
-        div.innerText = this.value.toString();
+    private createTileElement(): HTMLDivElement {
+        const tile = document.createElement('div');
+        tile.className = 'number';
+        tile.textContent = this.label.toString();
+        (tile as any).number = this.label; // típushiba elkerülése
 
-        div.addEventListener('click', () => {
-            const emptyPosition = this.emptyPosition;
-            if (emptyPosition !== null) {
-                this.setPosition(emptyPosition.x, emptyPosition.y);
+        tile.addEventListener('click', () => {
+            const available = this.getEmptyNeighbor();
+            if (available !== null) {
+                this.moveTo(available.col, available.row);
             }
         });
 
-        return div;
+        return tile;
     }
 
-    get emptyPosition(): { x: number, y: number } | null {
-        if (this.x === undefined || this.y === undefined) return null;
+    private getEmptyNeighbor(): { col: number; row: number } | null {
+        if (this.col === undefined || this.row === undefined) return null;
 
         const directions = [
-            { dx: -1, dy: 0 }, // left
-            { dx: 1, dy: 0 },  // right
-            { dx: 0, dy: 1 },  // down
-            { dx: 0, dy: -1 }  // up
+            { dx: -1, dy: 0 },
+            { dx: 1, dy: 0 },
+            { dx: 0, dy: 1 },
+            { dx: 0, dy: -1 },
         ];
 
         for (const { dx, dy } of directions) {
-            const checkX = this.x + dx;
-            const checkY = this.y + dy;
-
+            const newCol = this.col + dx;
+            const newRow = this.row + dy;
             if (
-                checkX >= 0 && checkX < this.size &&
-                checkY >= 0 && checkY < this.size &&
-                this.checkIsEmpty(checkX, checkY)
+                newCol >= 0 && newCol < this.boardSize &&
+                newRow >= 0 && newRow < this.boardSize &&
+                this.isCellEmpty(newCol, newRow)
             ) {
-                return { x: checkX, y: checkY };
+                return { col: newCol, row: newRow };
             }
         }
 
         return null;
     }
 
-    checkIsEmpty(checkX: number, checkY: number): boolean {
-        return !this.numbers.some(n => n.x === checkX && n.y === checkY);
+    private isCellEmpty(col: number, row: number): boolean {
+        return !this.allTiles.some(tile => tile.col === col && tile.row === row);
     }
 }
