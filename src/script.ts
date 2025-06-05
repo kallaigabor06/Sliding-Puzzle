@@ -1,37 +1,85 @@
-import { Number } from './number.js';
+export class Number {
+    private readonly value: number;
+    private readonly numbers: Number[];
+    private x: number | undefined;
+    private y: number | undefined;
+    private readonly size: number;
 
-const size: number = 10;
-createGrid(size);
-const numbers: Number[] = [];
-randomizeNumbers();
-
-function createGrid(size: number): void {
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid-container';
-    gridContainer.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-
-    for (let i = 0; i < size * size; i++) {
-        const gridItem = document.createElement('div');
-        gridItem.className = 'grid-item';
-        const unit = `calc(90vh / ${size})`;
-        gridItem.style.height = unit;
-        gridItem.style.fontSize = `calc(${unit} * 0.8)`;
-        gridContainer.appendChild(gridItem);
+    constructor(value: number, numbers: Number[], size: number) {
+        this.value = value;
+        this.numbers = numbers;
+        this.x = undefined;
+        this.y = undefined;
+        this.size = size;
     }
 
-    document.body?.appendChild(gridContainer);
-}
+    setPosition(x: number, y: number): void {
+        this.clearPreviousElement();
+        this.x = x;
+        this.y = y;
 
-function randomizeNumbers(): void {
-    for (let i = 1; i < size * size; i++) {
-        numbers.push(new Number(i, numbers, size));
-        const [x, y] = getRandomCoordinates(size);
-        numbers[numbers.length - 1].setPosition(x, y);
+        const div = this.createElement();
+        const index = y * this.size + x + 1;
+        const gridItem = document.querySelector(`div.grid-item:nth-of-type(${index})`);
+        if (gridItem) {
+            gridItem.appendChild(div);
+        }
     }
-}
 
-function getRandomCoordinates(size: number): [number, number] {
-    const x = Math.floor(Math.random() * size);
-    const y = Math.floor(Math.random() * size);
-    return [x, y];
+    private clearPreviousElement(): void {
+        if (this.x !== undefined && this.y !== undefined) {
+            const index = this.y * this.size + this.x + 1;
+            const oldItem = document.querySelector(`div.grid-item:nth-of-type(${index})`);
+            if (oldItem) {
+                oldItem.innerHTML = '';
+            }
+        }
+    }
+
+    private createElement(): HTMLDivElement {
+        const div = document.createElement('div');
+        div.className = 'number';
+        div.textContent = this.value.toString();
+        div.addEventListener('click', () => this.handleClick());
+        return div;
+    }
+
+    private handleClick(): void {
+        const emptyPosition = this.getEmptyPosition();
+        if (emptyPosition) {
+            this.setPosition(emptyPosition.x, emptyPosition.y);
+        }
+    }
+
+    private getEmptyPosition(): { x: number; y: number } | null {
+        if (this.x === undefined || this.y === undefined) {
+            return null;
+        }
+
+        const directions = [
+            { dx: -1, dy: 0 },  // left
+            { dx: 1, dy: 0 },   // right
+            { dx: 0, dy: 1 },   // down
+            { dx: 0, dy: -1 }   // up
+        ] as const;
+
+        for (const { dx, dy } of directions) {
+            const newX = this.x + dx;
+            const newY = this.y + dy;
+
+            if (this.isValidPosition(newX, newY) && this.isPositionEmpty(newX, newY)) {
+                return { x: newX, y: newY };
+            }
+        }
+
+        return null;
+    }
+
+    private isValidPosition(x: number, y: number): boolean {
+        return x >= 0 && x < this.size && y >= 0 && y < this.size;
+    }
+
+    private isPositionEmpty(x: number, y: number): boolean {
+        return !this.numbers.some(n => n.x === x && n.y === y);
+    }
 }

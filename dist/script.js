@@ -1,31 +1,72 @@
-import { Number } from './number.js';
-const size = 10;
-createGrid(size);
-const numbers = [];
-randomizeNumbers();
-function createGrid(size) {
-    const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid-container';
-    gridContainer.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-    for (let i = 0; i < size * size; i++) {
-        const gridItem = document.createElement('div');
-        gridItem.className = 'grid-item';
-        const unit = `calc(90vh / ${size})`;
-        gridItem.style.height = unit;
-        gridItem.style.fontSize = `calc(${unit} * 0.8)`;
-        gridContainer.appendChild(gridItem);
+export class Number {
+    value;
+    numbers;
+    x;
+    y;
+    size;
+    constructor(value, numbers, size) {
+        this.value = value;
+        this.numbers = numbers;
+        this.x = undefined;
+        this.y = undefined;
+        this.size = size;
     }
-    document.body?.appendChild(gridContainer);
-}
-function randomizeNumbers() {
-    for (let i = 1; i < size * size; i++) {
-        numbers.push(new Number(i, numbers, size));
-        const [x, y] = getRandomCoordinates(size);
-        numbers[numbers.length - 1].setPosition(x, y);
+    setPosition(x, y) {
+        this.clearPreviousElement();
+        this.x = x;
+        this.y = y;
+        const div = this.createElement();
+        const index = y * this.size + x + 1;
+        const gridItem = document.querySelector(`div.grid-item:nth-of-type(${index})`);
+        if (gridItem) {
+            gridItem.appendChild(div);
+        }
     }
-}
-function getRandomCoordinates(size) {
-    const x = Math.floor(Math.random() * size);
-    const y = Math.floor(Math.random() * size);
-    return [x, y];
+    clearPreviousElement() {
+        if (this.x !== undefined && this.y !== undefined) {
+            const index = this.y * this.size + this.x + 1;
+            const oldItem = document.querySelector(`div.grid-item:nth-of-type(${index})`);
+            if (oldItem) {
+                oldItem.innerHTML = '';
+            }
+        }
+    }
+    createElement() {
+        const div = document.createElement('div');
+        div.className = 'number';
+        div.textContent = this.value.toString();
+        div.addEventListener('click', () => this.handleClick());
+        return div;
+    }
+    handleClick() {
+        const emptyPosition = this.getEmptyPosition();
+        if (emptyPosition) {
+            this.setPosition(emptyPosition.x, emptyPosition.y);
+        }
+    }
+    getEmptyPosition() {
+        if (this.x === undefined || this.y === undefined) {
+            return null;
+        }
+        const directions = [
+            { dx: -1, dy: 0 }, // left
+            { dx: 1, dy: 0 }, // right
+            { dx: 0, dy: 1 }, // down
+            { dx: 0, dy: -1 } // up
+        ];
+        for (const { dx, dy } of directions) {
+            const newX = this.x + dx;
+            const newY = this.y + dy;
+            if (this.isValidPosition(newX, newY) && this.isPositionEmpty(newX, newY)) {
+                return { x: newX, y: newY };
+            }
+        }
+        return null;
+    }
+    isValidPosition(x, y) {
+        return x >= 0 && x < this.size && y >= 0 && y < this.size;
+    }
+    isPositionEmpty(x, y) {
+        return !this.numbers.some(n => n.x === x && n.y === y);
+    }
 }
